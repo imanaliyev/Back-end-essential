@@ -1,88 +1,60 @@
-const express = require('express')
-const app = express()
-const port = 3000
-const data =
-    [
-        {
-          "id": 2,
-          "description": "Sweet and savory sauces relishes spreads and seasonings",
-          "name": "Condiments"
-        },
-        {
-          "id": 1,
-          "description": "Soft drinks coffees teas beers and ales",
-          "name": "Beverages"
-        },
-        {
-          "id": 3,
-          "description": "Desserts candies and sweet breads",
-          "name": "Confections"
-        },
-        {
-          "id": 4,
-          "description": "Cheeses",
-          "name": "Dairy Products"
-        },
-        {
-          "id": 5,
-          "description": "Breads crackers pasta and cereal",
-          "name": "Grains/Cereals"
-        },
-        {
-          "id": 6,
-          "description": "Prepared meats",
-          "name": "Meat/Poultry"
-        },
-        {
-          "id": 7,
-          "description": "Dried fruit and bean curd",
-          "name": "Produce"
-        },
-        {
-          "id": 8,
-          "description": "Seaweed and fish",
-          "name": "Seafood"
-        }
-      ]
-app.use(express.json())
+import mongoose, { Schema } from "mongoose";
+import express, { json } from "express";
+import "dotenv/config";
 
-let counter = 1000
+const app = express();
+const port = process.env.PORT;
 
-app.get('/', (req, res) => {
+app.use(express.json());
 
-  
-    res.send(data)
-  })
+const productSchema = new Schema({
+  name: String,
+  price: Number,
+  thumbNail: String,
+  category: String,
+});
+const productModel = mongoose.model("myProducts", productSchema);
 
-app.get('/:id', (req, res) => {
-    const {id} = req.params
-    const result = data.find(x=> x.id === +id)
-  res.send(result)
-})
+app.get("/", async (req, res) => {
+  try {
+    const product = await productModel.find({});
+    res.status(200).json(product);
+  } catch (error) {
+    res, send("");
+  }
+});
 
+app.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  const product = await productModel.findById(id);
+  res.send(product);
+});
 
+app.post("/", async (req, res) => {
+  const { name, price, thumbNail, category } = req.body;
+  const newProduct = new productModel({ name, price, thumbNail, category });
+  await newProduct.save();
+  res.send("Got a Post request");
+});
 
-app.post('/', (req, res) => {
-    const {name,age}  = req.body
-    counter++
-    data.push({name , age , id: +counter})
-    res.send(data)
-  })
-  app.delete('/:id', (req, res) => {
-    const {id} = req.params
-    data.filter(x=> x.id !== +id)
-    res.send(data)
-  })
-  app.put('/:id', (req, res) => {
-    const {id} = req.params
-    const {name,age}  = req.body
-    const index = data.findIndex(x=> x.id === +id)
-    data[index] = {id ,name , age}
-    res.send("tut geldi")
+app.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, price, thumbNail, category } = req.body;
+  const product = await productModel.findByIdAndUpdate(id,{ name, price, thumbNail, category });
+  res.send(product);
+});
 
-    res.send(data)
-  })
+app.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  const product = await productModel.findByIdAndDelete(id);
+  res.send(product);
+});
+
+mongoose
+  .connect(process.env.DB_SECRET_KEY)
+  .then(() => console.log("Connected!"))
+  .catch((err) => console.log(err.message));
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
