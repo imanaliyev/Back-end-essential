@@ -7,18 +7,19 @@ const port = process.env.PORT;
 
 app.use(express.json());
 
-const productSchema = new Schema({
+const usersSchema = new Schema({
   name: String,
-  price: Number,
-  thumbNail: String,
-  category: String,
+  age: Number,
+  Email: String,
+  Password: String,
+  isMarried: Boolean
 });
-const productModel = mongoose.model("myProducts", productSchema);
+const usersModel = mongoose.model("myUsers", usersSchema);
 
 app.get("/", async (req, res) => {
   try {
-    const product = await productModel.find({});
-    res.status(200).json(product);
+    const user = await usersModel.find({});
+    res.status(200).json(user);
   } catch (error) {
     res, send("");
   }
@@ -26,28 +27,28 @@ app.get("/", async (req, res) => {
 
 app.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const product = await productModel.findById(id);
-  res.send(product);
+  const user = await usersModel.findById(id);
+  res.send(user);
 });
 
 app.post("/", async (req, res) => {
-  const { name, price, thumbNail, category } = req.body;
-  const newProduct = new productModel({ name, price, thumbNail, category });
-  await newProduct.save();
+  const { name, age, Email, Password,isMarried } = req.body;
+  const newUser = new usersModel({ name, age, Email, Password,isMarried });
+  await newUser.save();
   res.send("Got a Post request");
 });
 
 app.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, price, thumbNail, category } = req.body;
-  const product = await productModel.findByIdAndUpdate(id,{ name, price, thumbNail, category });
-  res.send(product);
+  const { name, age, Email, Password,isMarried } = req.body;
+  const user = await usersModel.findByIdAndUpdate(id,{ name, age, Email, Password,isMarried });
+  res.send(user);
 });
 
 app.delete('/:id', async (req, res) => {
   const { id } = req.params;
-  const product = await productModel.findByIdAndDelete(id);
-  res.send(product);
+  const user = await usersModel.findByIdAndDelete(id);
+  res.send(user);
 });
 
 mongoose
